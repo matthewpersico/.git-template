@@ -170,7 +170,19 @@ done
 ## Get the list of files being committed
 ##
 declare -a gitobjs
-readarray -t gitobjs < <(git diff-index --cached HEAD | perl -ane 'print "$F[-1]=>$F[-2]\n"')
+if (( $# ))
+then
+    pre_commit_ok_echo "Using command line arguments as git files to process,"\
+                       "assuming all are status 'M' unless you specify"\
+                       "otherwise (file:[DA})"
+    readarray -t gitobjs < <(perl -e '
+for (@ARGV){
+    @F=(split(/:/, $_), q(M));
+    print "$F[0]=>$F[1]\n";
+}' "$@")
+else
+    readarray -t gitobjs < <(git diff-index --cached HEAD | perl -ane 'print "$F[-1]=>$F[-2]\n"')
+fi
 declare -a files
 declare -a nonfiles
 
@@ -183,11 +195,11 @@ do
     then
         delgitobjs+=("$file")
         continue
-    elif [[ -f $obj ]]
+    elif [[ -f $file ]]
     then
-        files+=("$obj")
+        files+=("$file")
     else
-        nonfiles+=("$obj")
+        nonfiles+=("$file")
     fi
     ((opt_verbose)) && echo "$obj"
 done
