@@ -601,6 +601,14 @@ None
 but no; we have to run 'git diff-index --porcelain HEAD' and parse the output
 determine what files are about to be committed. </soapbox>
 
+If you want to test the hook, you can pass file paths relative to the repo
+root. Their status will be assumed 'M' unless you pass in another one; the only
+one that matters is 'D' for delete:
+
+ pre-commit bin/foo bin/buzz:M bin/bar:D
+
+The status for 'bin/foo' is assumed to be 'M'.
+
 =over 4
 
 =back
