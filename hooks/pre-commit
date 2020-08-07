@@ -401,7 +401,7 @@ then
                     then
                         "$tidycmd" "${perlfiles[@]}" 1>"$tfile" 2>&1
                         runcheck=1
-                        remediation="To correct, run $tidycmd --update ${perlfiles[*]}"
+                        remediation="To correct, run: (cd $(pwd); $tidycmd --update ${perlfiles[*]})"
                         break
                     fi
                 done
