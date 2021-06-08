@@ -111,7 +111,7 @@ declare moreopts
 declare helpnotallowed=0
 moreopts=1
 
-pre_commit_ok_echo "Original args to hook: $*"
+[[ -n $1 ]] && pre_commit_ok_echo "Args to hook: $*"
 
 if [ -n "$GIT_PRE_COMMIT_HOOK_ARGS" ] \
        || [ -n "$GPCHA" ]
