@@ -76,6 +76,11 @@ pre_commit_error_echo ()
     echo 'ERROR>>>' pre-commit hook: "$@"
 }
 
+pre_commit_warning_echo ()
+{
+    echo 'WARNING>>>' pre-commit hook: "$@"
+}
+
 pre_commit_info_echo ()
 {
     echo 'INFO>>>' pre-commit hook: "$@"
@@ -174,7 +179,7 @@ if (( $# ))
 then
     pre_commit_ok_echo "Using command line arguments as git files to process,"\
                        "assuming all are status 'M' unless you specify"\
-                       "otherwise (file:[DA})"
+                       "otherwise (file:[DA])"
     readarray -t gitobjs < <(perl -e '
 for (@ARGV){
     @F=(split(/:/, $_), q(M));
@@ -301,16 +306,25 @@ if ((${#files[@]}))
 then
     touch "$tfile"
 
-    ##
-    ## check: files being edited, not saved
-    ##
     for i in "${files[@]}"
     do
+        ##
+        ## check: files being edited, not saved
+        ##
         emacsfile="$(dirname "$(realpath "$i")")/.#$(basename "$i")"
         if [ -h "$emacsfile" ]
         then
             echo "$i" >> "$tfile"
         fi
+        ##
+        ## check: chmod - warning only
+        ##
+        if ( git diff "$i" | grep -q -E '^old mode' ); then
+            pre_commit_warning_echo "$i has changed permissions"
+            git diff "$i" | grep --color=never -E '^(old|new) mode'
+        fi
+
+
     done
     check "$tfile" \
           "Write your emacs buffers for these files:"
