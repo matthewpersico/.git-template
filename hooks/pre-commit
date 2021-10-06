@@ -1,4 +1,4 @@
-#!/opt/bb/bin/bash
+#!/usr/bin/env bash
 
 ##
 ## Various checks, pre-commit, bail early
