@@ -1,10 +1,10 @@
-#!/usr/bin/env bash
+#!/opt/bb/bin/bash
 
 ##
-## Various checks, pre-commit, bail early
+## Various checks, pre-commit, bail early.
 ##
 
-## Don't do my checks if I say not to
+## Don't do my checks if I say not to.
 if [ "$GIT_COMMIT_NO_VERIFY" = '1' ]
 then
     echo "****** GIT_COMMIT_NO_VERIFY='1'. Skipping hook. ******" >&2
@@ -38,7 +38,7 @@ check ()
     fi
     if [ "$status" != 0 ]
     then
-        ## This is the error message
+        ## This is the error message.
         echo
         if [[ -z $info ]]
         then
@@ -162,7 +162,7 @@ do
                 exit 0
             fi
             ;;
-        --) shift; break ;; ## end of opts, remaining $*, if any, are args
+        --) shift; break ;; ## end of opts, remaining $*, if any, are args.
         *) echo "Internal error!"; pod2text "$0" | ${PAGER:cat}; exit 1 ;;
     esac
 done
@@ -172,7 +172,7 @@ done
 ##
 
 ##
-## Get the list of files being committed
+## Get the list of objects being committed.
 ##
 declare -a gitobjs
 if (( $# ))
@@ -188,14 +188,19 @@ for (@ARGV){
 else
     readarray -t gitobjs < <(git diff-index --cached HEAD | perl -ane 'print "$F[-1]=>$F[-2]\n"')
 fi
+
+##
+## Split the list into files, nonfiles and deletes.
+##
 declare -a files
 declare -a nonfiles
+declare -a delgitobjs
 
 ((opt_verbose)) && pre_commit_ok_echo Current status:
 for obj in "${gitobjs[@]}"
 do
-    file=${obj%%=>*}
-    gitstat=${obj##*=>}
+    declare file=${obj%%=>*}
+    declare gitstat=${obj##*=>}
     if [[ $gitstat == 'D' ]]
     then
         delgitobjs+=("$file")
@@ -334,7 +339,7 @@ then
     ##
 
     ## These two are Perl constructs, but we could use them temporarily in any
-    ## file type.
+    ## file type, if commented out in the non-Perl language.
     grep -H -n -E -i '=for (later|comparison|commentout|review)' "${files[@]}" 1>"$tfile" 2>&1
     check "$tfile" \
           "One or more files contain suspicious Perl commenting. Delete old code, do not just comment it out. Don't add inactive code until you are ready to use it."
@@ -450,11 +455,17 @@ then
     then
         if ((do_python==1))
         then
-            black -q --check "${pythonfiles[@]}" 1>"$tfile" 2>&1
-            declare blackrc=$?
+            black --check "${pythonfiles[@]}" 1>"$tfile" 2>&1
+            declare pyrc=$?
             check "$tfile" \
-                  "One of more files has failed python black checks. Please review." \
-                  "$blackrc"
+                  "One of more files has failed python black checks. Please review. You can run 'black' on the failed files to fix them." \
+                  "$pyrc"
+
+            python -m isort --check "${pythonfiles[@]}" 1>"$tfile" 2>&1
+            pyrc=$?
+            check "$tfile" \
+                  "One of more files has failed python isort checks. Please review. You can run 'python -m isort' on the failed files to fix them." \
+                  "$pyrc"
         else
             echo "Skipping python black, by request."
         fi
@@ -511,7 +522,7 @@ then
 fi
 
 ##
-## Done
+## Done.
 ##
 
 if ((exitval==0))
@@ -660,7 +671,7 @@ Skip one or more validations:
   shellcheck
   shell (short for shellcheck)
 
-  python (black format check)
+  python (black and isort format checks)
   py (short for python)
 
   all - use this to just skip the whole hook. If using a git commit command,
