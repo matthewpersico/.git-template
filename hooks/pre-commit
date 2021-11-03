@@ -395,7 +395,7 @@ then
                 then
                     declare -a libs
                     readarray -t libs < <(find "$gitroot" -type d -name lib -printf '-I\n%p\n')
-                    "${TILDAE:-$HOME}/personal/bin/perlcheck-bulk" "${libs[@]}" "${perlfiles[@]}" 1>"$tfile" 2>&1
+                    "${TILDAE:-$HOME}/personal/bin/perlcheck-bulk" --no-progress "${libs[@]}" "${perlfiles[@]}" 1>"$tfile" 2>&1
                     runcheck=1
                 else
                     ((opt_verbose)) && pre_commit_ok_echo "Skipping Perl compile check, no perl compile check helpers found."
