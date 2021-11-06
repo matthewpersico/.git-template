@@ -375,6 +375,8 @@ then
             then
                 ((opt_verbose)) && pre_commit_ok_echo "Skipping Perl compile check, by request."
             else
+                declare remediation
+                declare checkcmd
                 declare runcheck=0
                 if [ -e "$gitroot/t/bin/apply-compile-check-everywhere" ]
                 then
@@ -389,19 +391,23 @@ then
                             cartonexec='carton exec'
                         fi
                     fi
-                    $cartonexec "$gitroot/t/bin/apply-compile-check-everywhere" "${perlfiles[@]}" 1>"$tfile" 2>&1
+                    checkcmd="$cartonexec $gitroot/t/bin/apply-compile-check-everywhere"
+                    $checkcmd "${perlfiles[@]}" 1>"$tfile" 2>&1
                     runcheck=1
+                    remediation="To review, run: (cd $(pwd); $checkcmd ${perlfiles[*]})"
                 elif [ -e "${TILDAE:-$HOME}/personal/bin/perlcheck-bulk" ]
                 then
                     declare -a libs
                     readarray -t libs < <(find "$gitroot" -type d -name lib -printf '-I\n%p\n')
-                    "${TILDAE:-$HOME}/personal/bin/perlcheck-bulk" --no-progress "${libs[@]}" "${perlfiles[@]}" 1>"$tfile" 2>&1
+                    checkcmd="${TILDAE:-$HOME}/personal/bin/perlcheck-bulk --no-progress ${libs[*]}"
+                    $checkcmd "${perlfiles[@]}" 1>"$tfile" 2>&1
                     runcheck=1
+                    remediation="To review, run: (cd $(pwd); $checkcmd ${perlfiles[*]})"
                 else
                     ((opt_verbose)) && pre_commit_ok_echo "Skipping Perl compile check, no perl compile check helpers found."
                 fi
                 ((runcheck==1)) && check "$tfile" \
-                                         "One or more files has syntax errors. Please review."
+                                         "One or more files has syntax errors. Please review. $remediation"
             fi
 
             ##
