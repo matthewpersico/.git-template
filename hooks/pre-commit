@@ -30,7 +30,7 @@ check ()
     local tfile=$1; shift
     local errmsg=$1; shift
     local status=$1; shift
-    local info=$1; shift
+    local postmsg=$1; shift
 
     if [ -z "$status" ]
     then
@@ -40,17 +40,15 @@ check ()
     then
         ## This is the error message.
         echo
-        if [[ -z $info ]]
+        pre_commit_error_echo "$errmsg"
+        cat "$tfile"
+        exitval=1
+        if [[ -n $postmsg ]]
         then
-            pre_commit_error_echo "$errmsg"
-            cat "$tfile"
-            exitval=1
-            return 1
-        else
-            pre_commit_info_echo "$errmsg"
-            cat "$tfile"
-            return 0
+            echo
+            echo "$postmsg"
         fi
+        return 1
     else
         return 0
     fi
@@ -420,6 +418,7 @@ then
                 declare remediation
                 declare tidycmd
                 declare runcheck=0
+                declare tidyrc=0
                 for tidycmd in \
                     "$gitroot/t/bin/apply-perltidy-everywhere" \
                         "${TILDAE:-$HOME}/personal/bin/perltidy-bulk"
@@ -427,6 +426,7 @@ then
                     if [ -e "$tidycmd" ]
                     then
                         "$tidycmd" "${perlfiles[@]}" 1>"$tfile" 2>&1
+                        tidyrc=$?
                         runcheck=1
                         remediation="To correct, run: (cd $(pwd); $tidycmd --update ${perlfiles[*]})"
                         break
@@ -435,7 +435,9 @@ then
                 if ((runcheck==1))
                 then
                     check "$tfile" \
-                          "One or more files has formatting errors. Please review. $remediation"
+                          "One or more files has formatting errors. Please review." \
+                          "$tidyrc" \
+                          "$remediation"
                 else
                     ((opt_verbose)) && pre_commit_ok_echo "Skipping Perl perltidy, no perl perltidy helpers found."
                 fi
