@@ -472,7 +472,7 @@ then
             isort --check "${pythonfiles[@]}" 1>"$tfile" 2>&1
             pyrc=$?
             check "$tfile" \
-                  "One of more files has failed python isort checks. Please review. You can run 'python -m isort' on the failed files to fix them." \
+                  "One of more files has failed python isort checks. Please review. You can run 'isort --overwrite-in-place' on the failed files to fix them." \
                   "$pyrc"
         else
             echo "Skipping python black, by request."
