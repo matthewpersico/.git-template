@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-## Instead of a common hook that gets propagated to each clone, requiring a
+## Instead of a full blown hook that gets propagated to each clone, requiring a
 ## sync process to get enhancements out to each clone, we just propagate this
 ## stub and voila: enhancements (and bugs, so be careful) are immediately
 ## available to all clones.
 
 ## We do this type check so that when we are bootstrapping a new environment,
-## we don't end up with a chicken an egg problem where we might be committing
+## we don't end up with a chicken and egg problem where we might be committing
 ## before the repo with this command is established.
 if type git-pre-commit-hook 2>/dev/null; then
     git-pre-commit-hook "$@"
