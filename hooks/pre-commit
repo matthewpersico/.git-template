@@ -13,4 +13,3 @@ if type git-pre-commit-hook 2>/dev/null; then
 else
     echo "git-pre-commit-hook not yet established. Continuing with commit..."
 fi
-exit 0
